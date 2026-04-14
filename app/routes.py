@@ -1,4 +1,4 @@
-from flask import Blueprint, send_file
+from flask import Blueprint, send_file, render_template_string
 import json
 from pathlib import Path
 
@@ -8,23 +8,21 @@ from .image import generate_image
 main = Blueprint('main', __name__)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_FILE = BASE_DIR / "data.json"
-STATS_FILE = BASE_DIR / "stats.png"
+DATA_FILE = Path('/tmp/data.json')
 
-def update_data(country):
+def load_data():
     try:
         with open(DATA_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
+            return json.load(f)
     except (ValueError, FileNotFoundError, OSError):
-        data = {}
+        return {}
 
+def update_data(country):
+    data = load_data()
     data[country] = data.get(country, 0) + 1
-
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
-
     return data
-
 
 @main.route('/')
 def home():
@@ -35,5 +33,5 @@ def track():
     ip = get_ip()
     country = get_country(ip)
     data = update_data(country)
-    img = generate_image(data, STATS_FILE)
-    return send_file(img, mimetype='image/png')
+    img_bytes = generate_image(data)
+    return send_file(img_bytes, mimetype='image/png')
