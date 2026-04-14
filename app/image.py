@@ -1,16 +1,12 @@
-from pathlib import Path
+from io import BytesIO
 from PIL import Image, ImageDraw
 
-
-def generate_image(data, output_path):
-    output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
+def generate_image(data):
     img = Image.new('RGB', (520, 320), color=(10, 10, 20))
     draw = ImageDraw.Draw(img)
 
     y = 20
-    draw.text((20, y), "🌍 Visitor Intelligence", fill=(0, 255, 255))
+    draw.text((20, y), "Visitor Intelligence", fill=(0, 255, 255))
     y += 40
 
     if data:
@@ -25,5 +21,7 @@ def generate_image(data, output_path):
     else:
         draw.text((20, y), "No visitor data yet.", fill=(255, 255, 255))
 
-    img.save(output_path)
-    return str(output_path)
+    img_bytes = BytesIO()
+    img.save(img_bytes, format='PNG')
+    img_bytes.seek(0)
+    return img_bytes
