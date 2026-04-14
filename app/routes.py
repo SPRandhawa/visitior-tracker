@@ -27,7 +27,14 @@ def update_data(country):
 @main.route('/')
 def home():
     return "Visitor Tracker Running 🚀"
-
+    
+@main.route('/debug')
+def debug():
+    ip = get_ip()
+    country = get_country(ip)
+    headers = dict(request.headers)
+    return f"IP: {ip}<br>Country: {country}<br>Headers: {headers}"
+    
 @main.route('/track.png')
 def track():
     ip = get_ip()
