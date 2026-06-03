@@ -10,8 +10,23 @@ def get_ip():
     return request.remote_addr or "127.0.0.1"
 
 def get_country(ip):
-    if not ip or ip.startswith("127.") or ip.startswith("10.") or ip.startswith("172.") or ip == "::1":
-        return "🌐 Unknown"
+    if not ip or ip == "::1":
+        return "Unknown"
+    try:
+        # Use ip-api.com instead - more reliable & free
+        response = requests.get(
+            f"http://ip-api.com/json/{ip}?fields=country,countryCode",
+            timeout=3
+        )
+        res = response.json()
+        if res.get("country"):
+            country = res["country"]
+            code = res.get("countryCode", "")
+            flag = ''.join(chr(0x1F1E0 + ord(c) - ord('A')) for c in code.upper()) if code else ""
+            return f"{flag} {country}"
+        return "Unknown"
+    except:
+        return "Unknown"
 
     try:
         response = requests.get(f"https://ipapi.co/{ip}/json/", timeout=3)
